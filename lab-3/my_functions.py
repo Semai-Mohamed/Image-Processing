@@ -1,3 +1,4 @@
+# my functions
 import tools
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,15 +16,17 @@ def filter_analysis(img,kernel):
     """apply filtre on imageand compare between original and filtred image"""
     filtred_im =apply_filter_to_single_channel(img,kernel)
     fig,ax = plt.subplots(1,2)
-    ax[0].imshow(img)
+    ax[0].imshow(img,cmap='gray')
     ax[0].set_title("original")
-    ax[1].imshow(filtred_im)
+    ax[1].imshow(filtred_im,cmap='gray')
     ax[1].set_title('filtred image')
 def apply_filter_to_single_channel(img,kernel):
     dimK = kernel.shape
     return tools.Conv2D(tools.add_padding(img,((dimK[0]-1)//2,(dimK[1]-1)//2)),kernel)
-def apply_filter_to_colored_img(img,kernel):
-    return np.dstack([apply_filter_to_single_channel(img[:,:,z],kernel) for z in range(3)])
+def apply_filter_to_colored_img(img, kernel):
+    result = np.dstack([apply_filter_to_single_channel(img[:,:,z], kernel) 
+                        for z in range(3)])
+    return np.clip(result, 0, 255).astype('uint8')  # ← هذا هو الحل
 def filter_analysis_colored(img,kernel):
     """apply filtre on imageand compare between original and filtred image"""
    
@@ -49,8 +52,10 @@ def get_Gy(img):
     return apply_filter_to_single_channel(img,Sy)
 # filtre laplace
 def get_L(img):
-    L = np.array([[0,1,0],[-1,4,-1],[0,1,0]])
-    return apply_filter_to_single_channel(img,L)
+    L = np.array([[ 0, -1,  0],
+                  [-1,  4, -1],
+                  [ 0, -1,  0]], dtype=float)
+    return apply_filter_to_single_channel(img, L)
 def module_grad(img):
     Gx = get_Gx(img)
     Gy = get_Gy(img)
